@@ -1,24 +1,32 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+import Home from "./pages/Home/Home";
+import AdminHome from "./pages/AdminHome/AdminHome";
+import CreateQuiz from "./pages/CreateQuiz/CreateQuiz";
+import { PersistGate } from "redux-persist/integration/react";
+import { Provider } from "react-redux";
+import reduxStore from "./Redux/store";
 
 function App() {
+  const {store, persistor} = reduxStore();
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <Router>
+          <Switch>
+            <Route exact path="/">
+              <Home />
+            </Route>
+            <Route exact path="/admin">
+              <AdminHome />
+            </Route>
+            <Route exact path="/new-quiz">
+              <CreateQuiz />
+            </Route>
+          </Switch>
+        </Router>
+      </PersistGate>
+    </Provider>
   );
 }
 
