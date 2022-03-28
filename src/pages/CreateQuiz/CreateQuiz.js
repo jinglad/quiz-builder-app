@@ -36,66 +36,66 @@ import { Draggable } from "react-beautiful-dnd";
 import { Switch } from "react-router-dom";
 import { DragDropContext } from "react-beautiful-dnd";
 import { Droppable } from "react-beautiful-dnd";
-import { SET_DOC_DESC, SET_DOC_NAME, SET_QUESTIONS } from "../../Redux/types";
-import { useDispatch } from "react-redux";
+import {
+  SET_DOC_DESC,
+  SET_DOC_NAME,
+  SET_QUESTIONS,
+  SET_QUIZES,
+} from "../../Redux/types";
+import { useDispatch, useSelector } from "react-redux";
 import { Box } from "@mui/system";
+import Header from "../../components/Header/Header";
+import { useHistory } from "react-router-dom";
 
 function CreateQuiz() {
-  // const [{}, dispatch] = useStateValue();
   const dispatch = useDispatch();
   const [questions, setQuestions] = useState([]);
   const [documentName, setDocName] = useState("untitled Document");
 
-  const [documentDescription, setDocDesc] = useState("Add Description");
-
-  const [questionType, setType] = useState("radio");
-  const [questionRequired, setRequired] = useState("true");
+  const [questionType, setType] = useState("checkbox");
   let { id } = useParams();
 
+  const { quizs } = useSelector((state) => state.quizReducer);
+
+  // console.log(quizs);
+
+  const history = useHistory();
+
   // console.log(id);
-  useEffect(() => {
-    var newQuestion = {
-      questionText: "Question",
-      answer: false,
-      answerKey: "",
-      questionType: "radio",
-      options: [{ optionText: "Option 1" }],
-      open: true,
-      required: false,
-    };
-
-    setQuestions([...questions, newQuestion]);
-  }, []);
-
   // useEffect(() => {
-  //   async function data_adding() {
-  //     // var request = await axios.get(`http://localhost:9000/data/${id}`);
-  //     // console.log("sudeep");
-  //     // var question_data = request.data.questions;
-  //     // console.log(question_data);
-  //     // var doc_name = request.data.document_name;
-  //     // var doc_descip = request.data.doc_desc;
-  //     // console.log(doc_name + " " + doc_descip);
-  //     setDocName(doc_name);
-  //     setDocDesc(doc_descip);
-  //     setQuestions(question_data);
-  //     dispatch({
-  //       type: SET_DOC_NAME,
-  //       doc_name: doc_name,
-  //     });
+  //   let newQuestion = {
+  //     questionText: "Question",
+  //     answer: false,
+  //     answerKey: "",
+  //     questionType: "checkbox",
+  //     options: [{ optionText: "Option 1" }, { optionText: "Option 2" }],
+  //     open: true,
+  //     required: false,
+  //   };
 
-  //     dispatch({
-  //       type: SET_DOC_DESC,
-  //       doc_desc: doc_descip,
-  //     });
-  //     dispatch({
-  //       type: SET_QUESTIONS,
-  //       questions: question_data,
-  //     });
-  //   }
-
-  //   data_adding();
+  //   setQuestions([...questions, newQuestion]);
   // }, []);
+
+  useEffect(() => {
+    const currentQuiz = quizs?.find((quiz) => quiz?.id === id);
+    console.log(currentQuiz);
+    if (currentQuiz) {
+      setQuestions(currentQuiz?.questions);
+      setDocName(currentQuiz?.document_name);
+    } else {
+      let newQuestion = {
+        questionText: "Question",
+        answer: false,
+        answerKey: "",
+        questionType: "checkbox",
+        options: [{ optionText: "Option 1" }, { optionText: "Option 2" }],
+        open: true,
+        required: false,
+      };
+
+      setQuestions([...questions, newQuestion]);
+    }
+  }, []);
 
   function changeType(e) {
     dispatch({
@@ -109,61 +109,46 @@ function CreateQuiz() {
     setType(questionType);
   }, [changeType]);
 
-  function saveQuestions() {
-    console.log("auto saving questions initiated");
-    var data = {
-      formId: "1256",
-      name: "My-new_file",
-      description: "first file",
-      questions: questions,
-    };
-
-    setQuestions(questions);
-  }
-
   function commitToDB() {
-    // console.log(questions);
+    // console.log(questions)
+    // console.log(quizs);
     dispatch({
       type: SET_QUESTIONS,
-      questions: questions,
+      payload: questions,
     });
 
-    // axios.post(`http://localhost:9000/add_questions/${id}`, {
-    //   document_name: documentName,
-    //   doc_desc: documentDescription,
-    //   questions: questions,
-    // });
+    const currectIndex = quizs?.findIndex((quiz) => quiz?.id === id);
+    // console.log(currectIndex);
+
+    if (currectIndex >= 0) {
+      quizs[currectIndex].document_name = documentName;
+      quizs[currectIndex].questions = questions;
+    } else {
+      quizs.push({
+        id,
+        document_name: documentName,
+        questions,
+      });
+    }
+
+    history.push("/");
   }
 
   function addMoreQuestionField() {
-    expandCloseAll(); //I AM GOD
+    expandCloseAll();
 
     setQuestions((questions) => [
       ...questions,
       {
         questionText: "Question",
-        questionType: "radio",
-        options: [{ optionText: "Option 1" }],
+        questionType: "checkbox",
+        options: [{ optionText: "Option 1" }, { optionText: "Option 2" }],
         open: true,
         required: false,
+        answer: false,
+        answerKey: "",
       },
     ]);
-  }
-
-  function addQuestionType(i, type) {
-    let qs = [...questions];
-    console.log(type);
-    qs[i].questionType = type;
-
-    setQuestions(qs);
-  }
-
-  function copyQuestion(i) {
-    expandCloseAll();
-    let qs = [...questions];
-    var newQuestion = qs[i];
-
-    setQuestions([...questions, newQuestion]);
   }
 
   function deleteQuestion(i) {
@@ -175,14 +160,14 @@ function CreateQuiz() {
   }
 
   function handleOptionValue(text, i, j) {
-    var optionsOfQuestion = [...questions];
+    let optionsOfQuestion = [...questions];
     optionsOfQuestion[i].options[j].optionText = text;
     //newMembersEmail[i]= email;
     setQuestions(optionsOfQuestion);
   }
 
   function handleQuestionValue(text, i) {
-    var optionsOfQuestion = [...questions];
+    let optionsOfQuestion = [...questions];
     optionsOfQuestion[i].questionText = text;
     setQuestions(optionsOfQuestion);
   }
@@ -191,7 +176,7 @@ function CreateQuiz() {
     if (!result.destination) {
       return;
     }
-    var itemgg = [...questions];
+    let itemgg = [...questions];
     const itemF = reorder(
       itemgg,
       result.source.index,
@@ -207,14 +192,8 @@ function CreateQuiz() {
     return result;
   };
 
-  function showAsQuestion(i) {
-    let qs = [...questions];
-    qs[i].open = false;
-    setQuestions(qs);
-  }
-
   function addOption(i) {
-    var optionsOfQuestion = [...questions];
+    let optionsOfQuestion = [...questions];
     if (optionsOfQuestion[i].options.length < 5) {
       optionsOfQuestion[i].options.push({
         optionText: "Option " + (optionsOfQuestion[i].options.length + 1),
@@ -227,49 +206,32 @@ function CreateQuiz() {
   }
 
   function setOptionAnswer(ans, qno) {
-    var Questions = [...questions];
-
+    let Questions = [...questions];
     Questions[qno].answer = ans;
-
     setQuestions(Questions);
     // console.log(qno + " " + ans);
   }
 
   function setOptionPoints(points, qno) {
-    var Questions = [...questions];
-
+    let Questions = [...questions];
     Questions[qno].points = points;
-
     setQuestions(Questions);
     // console.log(qno + " " + points);
   }
   function addAnswer(i) {
-    var answerOfQuestion = [...questions];
-
+    let answerOfQuestion = [...questions];
     answerOfQuestion[i].answer = !answerOfQuestion[i].answer;
-
     setQuestions(answerOfQuestion);
   }
 
   function doneAnswer(i) {
-    var answerOfQuestion = [...questions];
-
+    let answerOfQuestion = [...questions];
     answerOfQuestion[i].answer = !answerOfQuestion[i].answer;
-
     setQuestions(answerOfQuestion);
   }
 
-  function requiredQuestion(i) {
-    var requiredQuestion = [...questions];
-
-    requiredQuestion[i].required = !requiredQuestion[i].required;
-
-    // console.log(requiredQuestion[i].required + " " + i);
-    setQuestions(requiredQuestion);
-  }
-
   function removeOption(i, j) {
-    var optionsOfQuestion = [...questions];
+    let optionsOfQuestion = [...questions];
     if (optionsOfQuestion[i].options.length > 1) {
       optionsOfQuestion[i].options.splice(j, 1);
       setQuestions(optionsOfQuestion);
@@ -298,7 +260,7 @@ function CreateQuiz() {
   }
 
   function questionsUI() {
-    return questions.map((ques, i) => (
+    return questions?.map((ques, i) => (
       <Draggable key={i} draggableId={i + "id"} index={i}>
         {(provided, snapshot) => (
           <div
@@ -651,51 +613,55 @@ function CreateQuiz() {
   }
 
   return (
-    <div className="mt-5">
-      <div className="CreateQuiz">
-        <br />
-        <div className="section">
-          <div className="question_title_section">
-            <div className="question_form_top">
-              {/* <label>Quiz Title</label> */}
-              <input
-                type="text"
-                className="question_form_top_name"
-                style={{ color: "black" }}
-                placeholder="Quiz Title"
-                value={documentName}
-                onChange={(e) => {
-                  setDocName(e.target.value);
-                }}
-              />
+    <>
+      <Header />
+
+      <div className="mt-5">
+        <div className="CreateQuiz">
+          <br />
+          <div className="section">
+            <div className="question_title_section">
+              <div className="question_form_top">
+                {/* <label>Quiz Title</label> */}
+                <input
+                  type="text"
+                  className="question_form_top_name"
+                  style={{ color: "black" }}
+                  placeholder="Quiz Title"
+                  value={documentName}
+                  onChange={(e) => {
+                    setDocName(e.target.value);
+                  }}
+                />
+              </div>
             </div>
-          </div>
 
-          <DragDropContext onDragEnd={onDragEnd}>
-            <Droppable droppableId="droppable">
-              {(provided, snapshot) => (
-                <div {...provided.droppableProps} ref={provided.innerRef}>
-                  {questionsUI()}
+            <DragDropContext onDragEnd={onDragEnd}>
+              <Droppable droppableId="droppable">
+                {(provided, snapshot) => (
+                  <div {...provided.droppableProps} ref={provided.innerRef}>
+                    {questionsUI()}
 
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </DragDropContext>
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </DragDropContext>
 
-          <div className="save_form">
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={commitToDB}
-              style={{ fontSize: "14px" }}
-            >
-              Save
-            </Button>
+            <div className="save_form">
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={commitToDB}
+                style={{ fontSize: "14px" }}
+              >
+                Save
+              </Button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

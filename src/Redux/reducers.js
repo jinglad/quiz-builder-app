@@ -1,4 +1,10 @@
-import { CHANGE_TYPE, SET_DOC_DESC, SET_DOC_NAME, SET_QUESTIONS } from "./types";
+import {
+  CHANGE_TYPE,
+  SET_DOC_DESC,
+  SET_DOC_NAME,
+  SET_QUESTIONS,
+  SET_QUIZES
+} from "./types";
 
 const initialState = {
   questions: [
@@ -10,6 +16,7 @@ const initialState = {
       required: false,
     },
   ],
+  quizs: [],
   questionType: "checkbox",
   doc_name: "Untitled form ",
   doc_desc: " add the description ",
@@ -18,10 +25,17 @@ const initialState = {
 const reducer = (state = initialState, action) => {
   // console.log(action.payload)
   switch (action.type) {
-    case SET_QUESTIONS:
+    case SET_QUIZES:
+      console.log(action.payload)
       return {
         ...state,
-        questions: action.questions,
+        quizs: action.payload,
+      };
+    case SET_QUESTIONS:
+      // console.log("question ", action.payload)
+      return {
+        ...state,
+        questions: action.payload,
       };
     case CHANGE_TYPE:
       return {
@@ -44,4 +58,4 @@ const reducer = (state = initialState, action) => {
   }
 };
 
-export default reducer
+export default reducer;

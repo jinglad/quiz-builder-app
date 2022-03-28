@@ -9,7 +9,7 @@ const persistConfig = {
   storage,
 }
 
-const rootReducer = combineReducers({reducer: reducer})
+const rootReducer = combineReducers({quizReducer: reducer})
  
 const persistedReducer = persistReducer(persistConfig, rootReducer)
  

@@ -15,12 +15,12 @@ function App() {
         <Router>
           <Switch>
             <Route exact path="/">
-              <Home />
+              <AdminHome />
             </Route>
             <Route exact path="/admin">
               <AdminHome />
             </Route>
-            <Route exact path="/new-quiz">
+            <Route exact path="/form/:id">
               <CreateQuiz />
             </Route>
           </Switch>
