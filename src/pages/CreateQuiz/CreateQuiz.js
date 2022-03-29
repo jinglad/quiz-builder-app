@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./CreateQuiz.css";
+import UploadImage from "../../components/UploadModal/UploadModal";
 
 import { BsTrash } from "react-icons/bs";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
@@ -46,6 +47,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Box } from "@mui/system";
 import Header from "../../components/Header/Header";
 import { useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 function CreateQuiz() {
   const dispatch = useDispatch();
@@ -76,15 +78,22 @@ function CreateQuiz() {
   //   setQuestions([...questions, newQuestion]);
   // }, []);
 
+  const handleImgUpload = (url, i) => {
+    let optionsOfQuestion = [...questions];
+    optionsOfQuestion[i].questionUrl = url;
+    setQuestions(optionsOfQuestion);
+  };
+
   useEffect(() => {
     const currentQuiz = quizs?.find((quiz) => quiz?.id === id);
-    console.log(currentQuiz);
+    // console.log(currentQuiz);
     if (currentQuiz) {
       setQuestions(currentQuiz?.questions);
       setDocName(currentQuiz?.document_name);
     } else {
       let newQuestion = {
         questionText: "Question",
+        questionUrl: "",
         answer: false,
         answerKey: "",
         questionType: "checkbox",
@@ -141,6 +150,7 @@ function CreateQuiz() {
       ...questions,
       {
         questionText: "Question",
+        questionUrl: "",
         questionType: "checkbox",
         options: [{ optionText: "Option 1" }, { optionText: "Option 2" }],
         open: true,
@@ -194,12 +204,10 @@ function CreateQuiz() {
 
   function addOption(i) {
     let optionsOfQuestion = [...questions];
-    if (optionsOfQuestion[i].options.length < 5) {
+    if (optionsOfQuestion[i].options.length >= 2) {
       optionsOfQuestion[i].options.push({
         optionText: "Option " + (optionsOfQuestion[i].options.length + 1),
       });
-    } else {
-      console.log("Max  5 options ");
     }
     //console.log(optionsOfQuestion);
     setQuestions(optionsOfQuestion);
@@ -219,14 +227,18 @@ function CreateQuiz() {
     // console.log(qno + " " + points);
   }
   function addAnswer(i) {
+    // console.log(i);
     let answerOfQuestion = [...questions];
-    answerOfQuestion[i].answer = !answerOfQuestion[i].answer;
+    answerOfQuestion[i].answer = true;
+    answerOfQuestion[i].answerKey = i;
     setQuestions(answerOfQuestion);
   }
 
   function doneAnswer(i) {
     let answerOfQuestion = [...questions];
-    answerOfQuestion[i].answer = !answerOfQuestion[i].answer;
+    // answerOfQuestion[i].answer = !answerOfQuestion[i].answer;
+    answerOfQuestion[i].answer = true;
+    answerOfQuestion[i].answerKey = i;
     setQuestions(answerOfQuestion);
   }
 
@@ -287,7 +299,6 @@ function CreateQuiz() {
                     handleExpand(i);
                   }}
                   expanded={questions[i].open}
-                  className={questions[i].open ? "add_border" : ""}
                 >
                   <AccordionSummary
                     aria-controls="panel1a-content"
@@ -363,7 +374,15 @@ function CreateQuiz() {
                                 handleQuestionValue(e.target.value, i);
                               }}
                             />
-                            <CropOriginalIcon style={{ color: "#5f6368" }} />
+                            <input
+                              type="text"
+                              className="question"
+                              placeholder="Image Url"
+                              value={ques.questionUrl}
+                              onChange={(e) =>
+                                handleImgUpload(e.target.value, i)
+                              }
+                            />
                           </div>
 
                           {ques.options.map((op, j) => (
@@ -390,8 +409,6 @@ function CreateQuiz() {
                                 />
                               </div>
 
-                              <CropOriginalIcon style={{ color: "#5f6368" }} />
-
                               <IconButton
                                 aria-label="delete"
                                 onClick={() => {
@@ -403,7 +420,7 @@ function CreateQuiz() {
                             </div>
                           ))}
 
-                          {ques.options.length < 5 ? (
+                          {ques.options.length < 100 ? (
                             <div className="add_question_body">
                               <FormControlLabel
                                 disabled
@@ -615,6 +632,13 @@ function CreateQuiz() {
   return (
     <>
       <Header />
+      <Box sx={{ textAlign: "center", mt: 4 }}>
+        <Link to={`/response/${id}`}>
+          <Button variant="contained" color="primary">
+            View Quiz
+          </Button>
+        </Link>
+      </Box>
 
       <div className="mt-5">
         <div className="CreateQuiz">

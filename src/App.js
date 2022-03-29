@@ -6,6 +6,7 @@ import CreateQuiz from "./pages/CreateQuiz/CreateQuiz";
 import { PersistGate } from "redux-persist/integration/react";
 import { Provider } from "react-redux";
 import reduxStore from "./Redux/store";
+import UserResponse from "./pages/UserResponse/UserResponse";
 
 function App() {
   const {store, persistor} = reduxStore();
@@ -22,6 +23,9 @@ function App() {
             </Route>
             <Route exact path="/form/:id">
               <CreateQuiz />
+            </Route>
+            <Route exact path="/response/:id">
+              <UserResponse />
             </Route>
           </Switch>
         </Router>
